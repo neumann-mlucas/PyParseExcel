@@ -31,8 +31,10 @@ class ASTNode:
 
     def pprint(self, depth: int = 0) -> str:
         tabs = "\t" * depth
-        children = "".join(node.pprint(depth=depth + 1) for node in self.children)
-        return f"{tabs}<NODE:{self.type.upper()}({self.value})>\n{children}"
+        children = "".join(
+            sorted(node.pprint(depth=depth + 1) for node in self.children)
+        )
+        return f"{tabs}<NODE:{self.type.upper()} [{self.value}] >\n{children}"
 
     @property
     def end_node(self):

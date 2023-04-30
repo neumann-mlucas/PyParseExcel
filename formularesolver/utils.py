@@ -1,44 +1,48 @@
-from itertools import takewhile
 from typing import Iterator
 
-from lexer import Comma, LParenthesis, RParenthesis, Token
+from lexer import LParenthesis, Token
 
 
-def split_at(pred, iterable, max_split=-1, keep_separator=False):
-    if max_split == 0:
-        yield list(iterable)
-        return
+def parse_parenthesis_expr(tokens: Iterator[Token]) -> Iterator[Token]:
+    "returns all tokens inside the top level parenthesis"
+    depth = 0
+    for token in tokens:
+        match (token.value, depth):
+            case (")", 0):
+                break
+            case (")", _):
+                depth -= 1
+            case ("(", _):
+                depth += 1
+            case (_, -1):
+                raise SyntaxError("unmatched parenthesis")
+        yield token
 
-    buf = []
-    it = iter(iterable)
-    for item in it:
-        if pred(item):
-            yield buf
-            if keep_separator:
-                yield [item]
-            if max_split == 1:
-                yield list(it)
-                return
-            buf = []
-            max_split -= 1
-        else:
-            buf.append(item)
+
+def split_args(tokens: Iterator[Token]) -> Iterator[list[Token]]:
+    "split a expression on top level commas"
+    depth, buf = 0, []
+    for token in tokens:
+        match (token.value, depth):
+            case (",", 0):
+                yield buf
+                buf = []
+                continue
+            case ("(", _):
+                depth += 1
+            case (")", _):
+                depth -= 1
+            case (_, -1):
+                raise SyntaxError("unmatched parenthesis")
+        buf.append(token)
     yield buf
 
 
 def parse_function_args(tokens: Iterator[Token]) -> list[list[Token]]:
-    "parse tokens inside function parenthesis e.g fn( ... )"
-    lp = next(tokens)  # LParenthesis
+    "parse tokens inside function parenthesis e.g. fn( ... )"
+    lp = next(tokens)
     assert lp == LParenthesis, lp
 
-    args = takewhile(lambda t: t != RParenthesis, tokens)
-    args = split_at(lambda t: t == Comma, args)
-    args = list(args)  # need to consume iterator here
-
-    return args
-
-
-def parse_parenthesis_expr(tokens: Iterator[Token]) -> list[Token]:
-    "parse tokens inside parenthesis e.g ( expr )"
-    args = takewhile(lambda t: t != RParenthesis, tokens)
-    return list(args)
+    args = parse_parenthesis_expr(tokens)
+    args = split_args(args)
+    return list(args)  # need to consume iterator here
