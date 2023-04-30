@@ -20,11 +20,14 @@ class ASTNode:
         self.token = token
         self.children = children if children is not None else []
 
-    def __iter__(self) -> list:
+    def __iter__(self) -> list["ASTNode"]:
         return self.children
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> "ASTNode":
         return self.children[key]
+
+    def __len__(self) -> int:
+        return len(self.children)
 
     def __repr__(self) -> str:
         return self.pprint()
@@ -37,15 +40,17 @@ class ASTNode:
         return f"{tabs}<NODE:{self.type.upper()} [{self.value}] >\n{children}"
 
     @property
-    def end_node(self):
-        return True if self.children == [] else False
+    def is_end_node(self) -> bool:
+        return all(node.childless for node in self.children)
 
     @property
-    def operator(self):
-        return self.type == "operator"
+    def childless(self) -> bool:
+        return self.children == []
 
     def walk(self):
-        pass
+        yield self.token
+        for node in self.children:
+            yield from node.walk()
 
 
 def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
@@ -61,7 +66,7 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
         return parent
 
     match (token.name, token.value):
-        case ("variable", _) | ("constant", _):
+        case ("variable", _) | ("constant", _) | ("boolean", _):
             node = ASTNode(token, None)
             return parser(tokens, node)
 

@@ -29,7 +29,7 @@ def lexer_mapper(char: str) -> Token:
     match char:
         case "TRUE" | "FALSE":
             return Token("boolean", char)
-        case "SUM" | "MEAN" | "IF" | "AND" | "ABS":
+        case "SUM" | "MEAN" | "IF" | "AND" | "ABS" | "MIN" | "MAX":
             return Token("function", char)
         case "*" | "/" | "+" | "-":
             return Token("operator", char)
