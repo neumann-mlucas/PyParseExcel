@@ -1,7 +1,7 @@
 import unittest
 
-from lexer import lexer
-from utils import parse_function_args, parse_parenthesis_expr
+from formularesolver.lexer import lexer
+from formularesolver.utils import parse_function_args, parse_parenthesis_expr
 
 
 class TestUtils(unittest.TestCase):

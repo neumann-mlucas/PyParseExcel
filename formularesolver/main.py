@@ -1,12 +1,14 @@
 from parser import parser
 
+from interpreter import interpreter
 from lexer import lexer
 
 
 def main(expr):
     tokens = lexer(expr)
     ast = parser(iter(tokens))
-    print(ast)
+    ast = interpreter(ast)
+    print(ast.value)
 
 
 if __name__ == "__main__":

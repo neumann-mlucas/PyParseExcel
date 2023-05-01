@@ -1,0 +1,23 @@
+# Compiled Python files
+__pycache__/
+*.pyc
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Local development settings
+.env
+venv/
+.venv/
+.vscode/
+
+# Miscellaneous
+*.log
+*.swp
+*.DS_Store
+
+# Development
+tags
+.envrc
