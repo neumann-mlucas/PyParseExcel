@@ -28,3 +28,24 @@ This project is intended as a simple example and has some limitations:
 - Only a subset of Excel functions are implemented
 - The parser does not handle all possible input errors gracefully
 - The interpreter does not handle all possible data types and formats
+
+Not implemented:
+
+- datetime types;
+- auto converting data types
+- reference to other sheets
+- intersect operator
+
+### TODO
+
+- [ ] return correct error types (e.g. #NAME?, #REF!, #NULL!, #N/A, #DIV0!, #NUM!)
+- [x] parse all data types: FLOAT, INT, TEXT, LOGICAL
+- [ ] implement unary operators - and +
+- [x] parse all variable formats: AB12, $AB12, AB$12, $AB$12
+- [ ] implement range operator
+- [x] implement all binary / comparison operators
+- [ ] add common functions:
+  - [ ] AND, OR, XOR, IF, NOT
+  - [ ] ABS, COS, SIN, TAN, EXP, LOG, LOG10, PI
+  - [ ] BS, CEIL, EXP, FLOOR, LOG, LOG10, MAX, MIN, ROUND, SUN
+  - [ ] COS, PI, SIN, TAN

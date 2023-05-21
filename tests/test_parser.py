@@ -1,7 +1,7 @@
 import unittest
+from parser import parser
 
-from formularesolver.lexer import lexer
-from formularesolver.parser import parser
+from lexer import lexer
 
 
 class TestParser(unittest.TestCase):

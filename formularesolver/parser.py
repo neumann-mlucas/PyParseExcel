@@ -1,13 +1,13 @@
 from typing import Iterator
 
-from lexer import Token, priority
+from lexer import Token, get_precedence
 from utils import parse_function_args, parse_parenthesis_expr
 
 
-def need_swap(left_token: Token, right_token: Token) -> bool:
-    "evaluates if the right token has higher priority than the left token -- aka if a node swap is needed"
-    if right_token.name == "operator" or right_token.value == "/":
-        return priority(left_token) > priority(right_token)
+def needs_swap(left_token: Token, right_token: Token) -> bool:
+    "evaluates if the right token has higher precedence than the left token -- aka if a node swap is needed"
+    if right_token.type == "operator" or right_token.value == "/":
+        return get_precedence(left_token) > get_precedence(right_token)
     return False
 
 
@@ -15,7 +15,7 @@ class ASTNode:
     "Abstract Syntax Tree Node"
 
     def __init__(self, token: Token, children: list | None = None):
-        self.type = token.name
+        self.type = token.type
         self.value = token.value
         self.token = token
         self.children = children if children is not None else []
@@ -65,7 +65,7 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
     except StopIteration:
         return parent
 
-    match (token.name, token.value):
+    match token:
         case ("variable", _) | ("constant", _) | ("boolean", _):
             node = ASTNode(token, None)
             return parser(tokens, node)
@@ -81,7 +81,7 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
             right_operand = parser(tokens)
 
             # invert nodes if right priority > left priority
-            if need_swap(token, right_operand.token):
+            if needs_swap(token, right_operand.token):
                 parent = right_operand
                 node = ASTNode(token, [left_operand, right_operand.children.pop(0)])
                 right_operand.children.append(node)
