@@ -38,9 +38,11 @@ Not implemented:
 
 ### TODO
 
+- [ ] better error handling in parser and log management
 - [ ] return correct error types (e.g. #NAME?, #REF!, #NULL!, #N/A, #DIV0!, #NUM!)
 - [x] parse all data types: FLOAT, INT, TEXT, LOGICAL
-- [ ] implement unary operators - and +
+- [x] implement unary operators - and +
+- [ ] implement unary operator %
 - [x] parse all variable formats: AB12, $AB12, AB$12, $AB$12
 - [ ] implement range operator
 - [x] implement all binary / comparison operators
@@ -49,3 +51,4 @@ Not implemented:
   - [ ] ABS, COS, SIN, TAN, EXP, LOG, LOG10, PI
   - [ ] BS, CEIL, EXP, FLOOR, LOG, LOG10, MAX, MIN, ROUND, SUN
   - [ ] COS, PI, SIN, TAN
+- [ ] add integrated tests
