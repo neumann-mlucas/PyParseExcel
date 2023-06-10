@@ -75,9 +75,10 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
     except StopIteration:
         return parent  # base case
 
+    # print(token, parent)
     match token:
         case Token("variable"):
-            node = ASTNode(token)
+            node = VariableNode(token)
             return parser(tokens, node)
 
         case Token("constant"):
@@ -90,20 +91,45 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
             node = FunctionNode(token, args)
             return parser(tokens, node)
 
+        # handle left unary operators
+        case Token("operator", "+" | "-") if parent is None:
+            peek = next(tokens)
+            token = Token("operator", f"unary {token.value}")
+            # unary left operator only allowed when:
+            # - operator plus and minus
+            # - start of expression or parser called from the operator case
+            # - next token is a variable, constant or parenthesis expression
+            match peek:
+                case Token("variable"):
+                    node = FunctionNode(token, [VariableNode(peek)])
+                case Token("constant"):
+                    node = FunctionNode(token, [ConstantNode(peek)])
+                case Token("symbol", "("):
+                    tokens = chain([peek], tokens)  # re-insert left parenthesis
+                    node = FunctionNode(token, [parser(tokens)])
+                case _:
+                    raise SyntaxError(f"Invalid unary expression for token: {token}")
+            return parser(tokens, node)
+
+        # TODO: handle unary right (%)
+
         case Token("operator"):
-            left_operand = parent
-            right_operand = parser(tokens)
+            left = parent
+            right = parser(tokens)
+
+            # receives parent = none when a operator case call parser(tokens)
+            # or when operator in the beginning of a expression
+            # receives left_operand = none when expression ends in a operator
+            if left is None or right is None:
+                raise SyntaxError(f"Invalid right side operand: {token}")
 
             # invert nodes if right priority > left priority
-            if needs_swap(token, right_operand.token):
-                parent = right_operand
-                node = FunctionNode(
-                    token, [left_operand, right_operand.children.pop(0)]
-                )
-                right_operand.children.append(node)
-                return right_operand
+            if needs_swap(token, right.token):
+                node = FunctionNode(token, [left, right.children.pop(0)])
+                right.children.append(node)
+                return right
 
-            node = FunctionNode(token, [left_operand, right_operand])
+            node = FunctionNode(token, [left, right])
             return parser(tokens, node)
 
         case Token("symbol", "("):

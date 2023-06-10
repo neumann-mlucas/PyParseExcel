@@ -124,13 +124,15 @@ def get_precedence(token: Token) -> int:
             return 990
         case ("operator", ":"):
             return 980
+        case ("operator", "unary -" | "unary +"):
+            return 971
         case ("operator", "%"):
             return 970
         case ("operator", "^"):
             return 960
-        case ("operator", "*") | ("operator", "/"):
+        case ("operator", "*" | "/"):
             return 950
-        case ("operator", "+") | ("operator", "-"):
+        case ("operator", "+" | "-"):
             return 940
         case ("operator", "&"):
             return 930

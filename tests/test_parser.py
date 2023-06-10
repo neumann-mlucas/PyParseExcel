@@ -83,9 +83,49 @@ class TestParser(unittest.TestCase):
         expr = "-1"
         tokens = iter(lexer(expr))
         ast = parser(tokens)
-        assert ast.token.value == "-"
+        assert ast.token.value == "unary -"
         assert ast[0].token.value == 1
+
+        expr = "1 + + 2"
+        tokens = iter(lexer(expr))
+        ast = parser(tokens)
+        assert ast.token.value == "+"
+        assert ast[1].token.value == "unary +"
+
+        expr = "1 - - 2"
+        tokens = iter(lexer(expr))
+        ast = parser(tokens)
+        assert ast.token.value == "-"
+        assert ast[1].token.value == "unary -"
+
+        expr = "- 2 + 3"
+        tokens = iter(lexer(expr))
+        ast = parser(tokens)
+        assert ast.token.value == "+"
+        assert ast[0].token.value == "unary -"
+
+        expr = "- 2 + - 3"
+        tokens = iter(lexer(expr))
+        ast = parser(tokens)
+        assert ast.token.value == "+"
+        assert ast[0].token.value == "unary -"
+        assert ast[1].token.value == "unary -"
+
+        expr = "- (1 + 2)"
+        tokens = iter(lexer(expr))
+        ast = parser(tokens)
+        assert ast.token.value == "unary -"
+
+    def test_operators_errors(self):
+        expr = "1 * * 2"
+        tokens = iter(lexer(expr))
+        self.assertRaises(SyntaxError, parser, tokens)
+
+        expr = "1 -"
+        tokens = iter(lexer(expr))
+        self.assertRaises(SyntaxError, parser, tokens)
 
 
 if __name__ == "__main__":
     unittest.main()
+    # TestParser().test_unary_operators()
