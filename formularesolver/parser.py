@@ -26,12 +26,11 @@ class ASTNode:
 
     def pprint(self, depth: int = 0) -> str:
         tabs = "\t" * depth
+        token = f"{self.token.type.title()} ({self.token.value!r})"
         children = "".join(
             sorted(node.pprint(depth=depth + 1) for node in self.children)
         )
-        return (
-            f"{tabs}<NODE:{self.token.type.upper()} [{self.token.value}] >\n{children}"
-        )
+        return f"{tabs}<NODE: {token})>\n{children}"
 
     @property
     def is_end_node(self) -> bool:
@@ -75,7 +74,6 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
     except StopIteration:
         return parent  # base case
 
-    # print(token, parent)
     match token:
         case Token("variable"):
             node = VariableNode(token)
@@ -91,7 +89,7 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
             node = FunctionNode(token, args)
             return parser(tokens, node)
 
-        # handle left unary operators
+        # handles left associative unary operators
         case Token("operator", "+" | "-") if parent is None:
             peek = next(tokens)
             token = Token("operator", f"unary {token.value}")
@@ -111,8 +109,12 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
                     raise SyntaxError(f"Invalid unary expression for token: {token}")
             return parser(tokens, node)
 
-        # TODO: handle unary right (%)
+        # handles right associative unary operator (%)
+        case Token("operator", "%"):
+            node = FunctionNode(token, [parent])
+            return parser(tokens, node)
 
+        # handles binary operators
         case Token("operator"):
             left = parent
             right = parser(tokens)
@@ -132,6 +134,7 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
             node = FunctionNode(token, [left, right])
             return parser(tokens, node)
 
+        # handles parenthesis precedence
         case Token("symbol", "("):
             expr = parse_parenthesis_expr(chain([token], tokens))
             node = ParenthesesNode(token, [parser(iter(expr), parent)])

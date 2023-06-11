@@ -125,6 +125,40 @@ class TestParser(unittest.TestCase):
         tokens = iter(lexer(expr))
         self.assertRaises(SyntaxError, parser, tokens)
 
+    def test_percent_operator(self):
+        expr = "10%"
+        tokens = iter(lexer(expr))
+        ast = parser(tokens)
+        assert ast.token.type == "operator"
+
+        expr = "%10"
+        tokens = iter(lexer(expr))
+        self.assertRaises(SyntaxError, parser, tokens)
+
+        expr = "20% * 10"
+        tokens = iter(lexer(expr))
+        ast = parser(tokens)
+        assert ast.token.value == "*"
+        assert ast[0].token.value == "%"
+
+        expr = "10 * 20%"
+        tokens = iter(lexer(expr))
+        ast = parser(tokens)
+        assert ast.token.value == "*"
+        assert ast[1].token.value == "%"
+
+        expr = "-20%"
+        tokens = iter(lexer(expr))
+        ast = parser(tokens)
+        assert ast.token.value == "%"
+        assert ast[0].token.value == "unary -"
+
+        expr = "1:20%"
+        tokens = iter(lexer(expr))
+        ast = parser(tokens)
+        assert ast.token.value == "%"
+        assert ast[0].token.value == ":"
+
 
 if __name__ == "__main__":
     unittest.main()
