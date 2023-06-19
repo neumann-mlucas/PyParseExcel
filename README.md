@@ -19,6 +19,15 @@ Using the REPL:
 
 Calling the API directly inside a script:
 
+```
+from pyexcelparser import formula_resolver
+r = formula_resolver("1 + COS(2 * PI())")
+print(r)
+>>> 2
+
+
+```
+
 Loading a CSV file and evaluating all the formulas in cells:
 
 ### Limitations
@@ -41,14 +50,13 @@ Not implemented:
 - [ ] better error handling in parser and log management
 - [ ] return correct error types (e.g. #NAME?, #REF!, #NULL!, #N/A, #DIV0!, #NUM!)
 - [x] parse all data types: FLOAT, INT, TEXT, LOGICAL
-- [x] implement unary operators - and +
-- [ ] implement unary operator %
+- [x] implement unary operators -, + and %
 - [x] parse all variable formats: AB12, $AB12, AB$12, $AB$12
-- [ ] implement range operator
 - [x] implement all binary / comparison operators
-- [ ] add common functions:
-  - [ ] AND, OR, XOR, IF, NOT
-  - [ ] ABS, COS, SIN, TAN, EXP, LOG, LOG10, PI
-  - [ ] BS, CEIL, EXP, FLOOR, LOG, LOG10, MAX, MIN, ROUND, SUN
-  - [ ] COS, PI, SIN, TAN
-- [ ] add integrated tests
+- [x] add common functions:
+  - [x] AND, OR, XOR, IF, NOT
+  - [x] ABS, COS, SIN, TAN, EXP, LOG, LOG10, PI
+  - [x] CEIL, EXP, FLOOR, LOG, LOG10, MAX, MIN, ROUND, SUM
+  - [x] COS, PI, SIN, TAN
+- [x] add integrated tests
+- [ ] implement range operator

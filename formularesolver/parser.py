@@ -10,6 +10,7 @@ class ASTNode:
 
     def __init__(self, token: Token, children: list[Self] | None = None):
         self.token = token
+        self.value = token.value
         self.children = children if children is not None else []
 
     def __iter__(self) -> list[Self]:
@@ -26,17 +27,12 @@ class ASTNode:
 
     def pprint(self, depth: int = 0) -> str:
         tabs = "\t" * depth
-        token = f"{self.token.type.title()} ({self.token.value!r})"
-        children = "".join(
-            sorted(node.pprint(depth=depth + 1) for node in self.children)
-        )
-        return f"{tabs}<NODE: {token})>\n{children}"
+        children = "".join((node.pprint(depth=depth + 1) for node in self.children))
+        return f"{tabs}<{self.__class__.__name__}: {self.value.__repr__()}>\n{children}"
 
-    @property
-    def is_end_node(self) -> bool:
-        return all(node.childless for node in self.children)
+    def end_node(self) -> bool:
+        return all(node.childless() for node in self.children)
 
-    @property
     def childless(self) -> bool:
         return self.children == []
 
@@ -85,8 +81,19 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
 
         case Token("function"):
             args = parse_function_args(tokens)
-            args = [parser(iter(arg)) for arg in args]
-            node = FunctionNode(token, args)
+            args = filter(None, (parser(iter(arg)) for arg in args))
+            node = FunctionNode(token, list(args))
+            return parser(tokens, node)
+
+        # handles parenthesis precedence
+        case Token("symbol", "("):
+            expr = parse_parenthesis_expr(chain([token], tokens))
+            node = ParenthesesNode(token, [parser(iter(expr), parent)])
+            return parser(tokens, node)
+
+        # handles right associative unary operator (%)
+        case Token("operator", "%") if parent is not None:
+            node = FunctionNode(token, [parent])
             return parser(tokens, node)
 
         # handles left associative unary operators
@@ -109,13 +116,8 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
                     raise SyntaxError(f"Invalid unary expression for token: {token}")
             return parser(tokens, node)
 
-        # handles right associative unary operator (%)
-        case Token("operator", "%"):
-            node = FunctionNode(token, [parent])
-            return parser(tokens, node)
-
         # handles binary operators
-        case Token("operator"):
+        case Token("operator") if parent is not None:
             left = parent
             right = parser(tokens)
 
@@ -125,19 +127,25 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
             if left is None or right is None:
                 raise SyntaxError(f"Invalid right side operand: {token}")
 
+            # hacky way to handle minus sign, transforms '2 - 1' into '2 + (-1)'
+            # if right operand is a FunctionNode, applies unary - to the first children
+            MINUS = Token("operator", "unary -")
+            if token.value == "-" and isinstance(right, FunctionNode):
+                sub_node = FunctionNode(MINUS, [right.children.pop(0)])
+                right.children.insert(0, sub_node)
+                token = Token("operator", "+")
+
+            elif token.value == "-":
+                right = FunctionNode(MINUS, [right])
+                token = Token("operator", "+")
+
             # invert nodes if right priority > left priority
             if needs_swap(token, right.token):
                 node = FunctionNode(token, [left, right.children.pop(0)])
-                right.children.append(node)
+                right.children.insert(0, node)
                 return right
 
             node = FunctionNode(token, [left, right])
-            return parser(tokens, node)
-
-        # handles parenthesis precedence
-        case Token("symbol", "("):
-            expr = parse_parenthesis_expr(chain([token], tokens))
-            node = ParenthesesNode(token, [parser(iter(expr), parent)])
             return parser(tokens, node)
 
         case _:
