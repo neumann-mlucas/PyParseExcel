@@ -59,10 +59,9 @@ def interpreter(node: ASTNode, variables=None) -> ASTNode:
             return ConstantNode(Token("constant", value))
         case ParenthesesNode(children=children):
             return children[0]
-        case FunctionNode(value=value, children=children) if node.end_node:
+        case FunctionNode(value=value, children=children) if node.end_node():
             fn = OPERATIONS[value]
-            inputs = [c.value for c in children]
-            result = fn(*inputs)
+            result = fn(*(c.value for c in children))
             return ConstantNode(Token("constant", result))
         case ASTNode(children=children):
             node.children = [interpreter(child, variables) for child in children]
@@ -72,6 +71,7 @@ def interpreter(node: ASTNode, variables=None) -> ASTNode:
 def formula_resolver(expr: str):
     tokens = lexer(expr)
     ast = parser(tokens)
+    print(ast)
     result = interpreter(ast)
     return result.token.value
 
