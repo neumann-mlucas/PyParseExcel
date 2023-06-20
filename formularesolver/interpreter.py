@@ -55,8 +55,8 @@ def interpreter(node: ASTNode, variables=None) -> ASTNode:
         case ConstantNode(value=value):
             return node
         case VariableNode(value=value):
-            value = variables[value]
-            return ConstantNode(Token("constant", value))
+            var_value = variables[value]
+            return ConstantNode(Token("constant", var_value))
         case ParenthesesNode(children=children):
             return children[0]
         case FunctionNode(value=value, children=children) if node.end_node():
@@ -71,12 +71,10 @@ def interpreter(node: ASTNode, variables=None) -> ASTNode:
 def formula_resolver(expr: str):
     tokens = lexer(expr)
     ast = parser(tokens)
-    print(ast)
     result = interpreter(ast)
-    return result.token.value
+    return result.value
 
 
 if __name__ == "__main__":
-    pass
-    # expr = "1 + COS(2 * PI(1))"
+    expr = "1 + COS(2 * PI(1))"
     # print(formula_resolver(expr))

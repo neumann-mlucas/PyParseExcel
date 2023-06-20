@@ -25,6 +25,9 @@ class ASTNode:
     def __repr__(self) -> str:
         return self.pprint()
 
+    def __bool__(self) -> bool:
+        return True
+
     def pprint(self, depth: int = 0) -> str:
         tabs = "\t" * depth
         children = "".join((node.pprint(depth=depth + 1) for node in self.children))
@@ -34,7 +37,7 @@ class ASTNode:
         return all(node.childless() for node in self.children)
 
     def childless(self) -> bool:
-        return self.children == []
+        return not isinstance(self, FunctionNode) and self.children == []
 
     def walk(self) -> Iterator[Token]:
         yield self.token
@@ -121,8 +124,7 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
             left = parent
             right = parser(tokens)
 
-            # receives parent = none when a operator case call parser(tokens)
-            # or when operator in the beginning of a expression
+            # receives parent = none when a operator case call parser(tokens) or when operator in the beginning of a expression
             # receives left_operand = none when expression ends in a operator
             if left is None or right is None:
                 raise SyntaxError(f"Invalid right side operand: {token}")
@@ -134,7 +136,6 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
                 sub_node = FunctionNode(MINUS, [right.children.pop(0)])
                 right.children.insert(0, sub_node)
                 token = Token("operator", "+")
-
             elif token.value == "-":
                 right = FunctionNode(MINUS, [right])
                 token = Token("operator", "+")
@@ -142,11 +143,17 @@ def parser(tokens: Iterator[Token], parent=None) -> ASTNode:
             # invert nodes if right priority > left priority
             if needs_swap(token, right.token):
                 node = FunctionNode(token, [left, right.children.pop(0)])
+                # need to check if token has priority over next children too
+                # e.g. -> 1 ^ 2 * 3 + 4
+                if needs_swap(token, node[1].token):
+                    subnode = node.children.pop()
+                    node.children.append(subnode.children.pop(0))
+                    subnode.children.append(node)
+                    node = subnode
                 right.children.insert(0, node)
                 return right
 
-            node = FunctionNode(token, [left, right])
-            return parser(tokens, node)
+            return FunctionNode(token, [left, right])
 
         case _:
             raise SyntaxError(f"Invalid token: {token}")

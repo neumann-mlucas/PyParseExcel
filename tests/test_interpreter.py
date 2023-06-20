@@ -34,13 +34,12 @@ class TestInterpreter(unittest.TestCase):
         ("1 * 2 + 3", 5),
         ("3 + 2 * 1", 5),
         ("4 + 3 * 1 ^ 2", 7),
-        # ("1 ^ 2 * 3 + 4", 7),
+        ("1 ^ 2 * 3 + 4", 7),
     ]
 
     def test_generic_math_expression(self):
         for expr, expected in self.MATH_EXPRESSION_LIST:
             result = formula_resolver(expr)
-
             assert result == expected, (expr, result)
 
 

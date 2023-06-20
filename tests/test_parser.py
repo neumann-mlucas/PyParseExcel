@@ -35,14 +35,12 @@ class TestParser(unittest.TestCase):
         expr = "4 + 3 * 1 ^ 2"
         tokens = iter(lexer(expr))
         ast = parser(tokens)
-        print(ast)
         assert ast.value == "+"
         assert ast[1].value == "*"
 
         expr = "1 ^ 2 * 3 + 4"
         tokens = iter(lexer(expr))
         ast = parser(tokens)
-        print(ast)
         assert ast.value == "+"
         assert ast[0].value == "*"
 
