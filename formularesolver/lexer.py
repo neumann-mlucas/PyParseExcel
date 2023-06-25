@@ -56,7 +56,7 @@ SYMBOLS = (
 
 
 # VARIABLES
-RE_CELL_REF = re.compile(r"\$?[A-Z]+\$?[1-9]+").match
+RE_CELL_REF = re.compile(r"\$?[A-Z]+\$?[0-9]+").match
 # DATE TYPES
 RE_BOOL = re.compile("TRUE|FALSE").match
 RE_STRING = re.compile(r"\".*?\"").match

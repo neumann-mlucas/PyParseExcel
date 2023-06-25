@@ -2,7 +2,9 @@
 
 This is a toy project written in Python that demonstrates how to implement a lexer, parser, and interpreter for Excel formulas. The main goal is just to provide a example of how to implement these fundamental components of a programming language interpreter without relying on third-party libraries.
 
-Please note that this is not intended to be a production-ready implementation of an Excel interpreter. Instead, it only supports a small subset of the Excel formulas grammar. Additionally, some common features, such as variable scope, semantic analysis, call stack, and procedure calls, have not been implemented.
+Please note that this is not intended to be a production-ready implementation of an Excel interpreter. Instead, it only supports a small subset of the Excel formulas grammar. Additionally, some common features of interpreters, such as variable scope, semantic analysis, call stack, and procedure calls, have not been implemented.
+
+Also the interpreter doesn't implement strictly the same behavior as the original excel formula resolver. Since I don't use excel very often and this is only intend as a study, is probably that some functions are implemented with different behavior
 
 ### Project Overview
 
@@ -15,20 +17,24 @@ The project is implemented in Python and consists of the following files:
 
 ### Usage
 
-Using the REPL:
+- Using the REPL:
 
-Calling the API directly inside a script:
+  > WIP
 
-```
+- Calling the API directly inside a script:
+
+```python
 from pyexcelparser import formula_resolver
-r = formula_resolver("1 + COS(2 * PI())")
-print(r)
+
+formula_resolver("1 + COS(2 * PI())")
 >>> 2
-
-
+formula_resolver("SUM(A1:A2)", variable = {"A1":1, "A2":2})
+>>> 3
 ```
 
-Loading a CSV file and evaluating all the formulas in cells:
+- Loading a CSV file and evaluating all the formulas in cells:
+
+  > WIP
 
 ### Limitations
 
@@ -47,8 +53,12 @@ Not implemented:
 
 ### TODO
 
+- [ ] parse and resolve csv file
+- [ ] implement repl
+- [ ] use custom dict for variables
 - [ ] better error handling in parser and log management
 - [ ] return correct error types (e.g. #NAME?, #REF!, #NULL!, #N/A, #DIV0!, #NUM!)
+- [ ] implemented some ref functions
 - [x] parse all data types: FLOAT, INT, TEXT, LOGICAL
 - [x] implement unary operators -, + and %
 - [x] parse all variable formats: AB12, $AB12, AB$12, $AB$12
@@ -59,4 +69,4 @@ Not implemented:
   - [x] CEIL, EXP, FLOOR, LOG, LOG10, MAX, MIN, ROUND, SUM
   - [x] COS, PI, SIN, TAN
 - [x] add integrated tests
-- [ ] implement range operator
+- [x] implement range operator

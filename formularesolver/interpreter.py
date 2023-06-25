@@ -1,21 +1,21 @@
 import math
 import operator
-from operator import add, mod, mul, truediv, xor
 from parser import (ASTNode, ConstantNode, FunctionNode, ParenthesesNode,
                     VariableNode, parser)
 
 from lexer import Token, lexer
+from utils import excel_range
 
 
-def range_operator(a, b):
-    pass
+def range_operator(a: str, b: str, variables: dict) -> list:
+    return [variables.get(v) for v in excel_range(a, b)]
 
 
 OPERATIONS = {
     # logical functions
-    "AND": all,
-    "OR": any,
-    "XOR": xor,
+    "AND": lambda *args: all(args),
+    "OR": lambda *args: any(args),
+    "XOR": operator.xor,
     "IF": lambda a, b, c: b if a else c,
     "NOT": lambda a: not a,
     # operators
@@ -44,13 +44,17 @@ OPERATIONS = {
     "MIN": min,
     "ROUND": round,
     "SUM": sum,
+    # logical operators
+    "=": operator.eq,
+    "<>": operator.ne,
+    "<=": operator.le,
+    ">=": operator.ge,
+    ">": operator.gt,
+    "<": operator.lt,
 }
 
 
-def interpreter(node: ASTNode, variables=None) -> ASTNode:
-    if variables is None:
-        variables = {}
-
+def interpreter(node: ASTNode, variables: dict) -> ASTNode:
     match node:
         case ConstantNode(value=value):
             return node
@@ -61,20 +65,41 @@ def interpreter(node: ASTNode, variables=None) -> ASTNode:
             return children[0]
         case FunctionNode(value=value, children=children) if node.end_node():
             fn = OPERATIONS[value]
-            result = fn(*(c.value for c in children))
+            if need_refs(value):
+                result = fn(*(c.value for c in children), variables=variables)
+            else:
+                result = fn(*(c.value for c in children))
             return ConstantNode(Token("constant", result))
         case ASTNode(children=children):
             node.children = [interpreter(child, variables) for child in children]
             return interpreter(node, variables)
 
 
-def formula_resolver(expr: str):
+def need_refs(function: str) -> bool:
+    return function in (":")
+
+
+def formula_resolver(expr: str, variables: dict = None):
+    if variables is None:
+        variables = {}
     tokens = lexer(expr)
     ast = parser(tokens)
-    result = interpreter(ast)
+    result = interpreter(ast, variables)
     return result.value
 
 
 if __name__ == "__main__":
-    expr = "1 + COS(2 * PI(1))"
-    # print(formula_resolver(expr))
+    variables = {
+        "A1": 1,
+        "A2": 1,
+        "A3": 1,
+        "A4": 1,
+        "A5": 1,
+        "A6": 1,
+        "A7": 1,
+        "A8": 1,
+        "A9": 1,
+        "A10": 1,
+    }
+    expr = "SUM(A1:A10) + COS(2 * PI())"
+    print(formula_resolver(expr, variables))
