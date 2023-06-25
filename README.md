@@ -10,9 +10,9 @@ Also the interpreter doesn't implement strictly the same behavior as the origina
 The project is implemented in Python and consists of the following files:
 
 - `lexer.py`: Defines the lexical analysis rules for the parser.
-- `parser.py`: Defines the syntax analysis rules for the parser.
-- `interpreter.py`: Implements the interpreter for the parsed formulas.
-- `main.py`: Provides a REPL (Read-Eval-Print Loop) for users to input and evaluate Excel formulas.
+- `parser.py`: Defines the syntax analysis rules for the parser to assemple the AST.
+- `interpreter.py`: Implements the interpreter that evaluates the AST.
+- `main.py`: Provides a REPL (WIP) for users to input and evaluate Excel formulas and a cli interface to process csv files.
 
 ### Usage
 
