@@ -84,6 +84,7 @@ def formula_resolver(expr: str, variables: dict = None):
         variables = {}
     tokens = lexer(expr)
     ast = parser(tokens)
+    # print(ast)
     result = interpreter(ast, variables)
     return result.value
 

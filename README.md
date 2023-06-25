@@ -1,7 +1,6 @@
 ### PyParseExcel
 
 This is a toy project written in Python that demonstrates how to implement a lexer, parser, and interpreter for Excel formulas. The main goal is just to provide a example of how to implement these fundamental components of a programming language interpreter without relying on third-party libraries.
-
 Please note that this is not intended to be a production-ready implementation of an Excel interpreter. Instead, it only supports a small subset of the Excel formulas grammar. Additionally, some common features of interpreters, such as variable scope, semantic analysis, call stack, and procedure calls, have not been implemented.
 
 Also the interpreter doesn't implement strictly the same behavior as the original excel formula resolver. Since I don't use excel very often and this is only intend as a study, is probably that some functions are implemented with different behavior
@@ -34,7 +33,35 @@ formula_resolver("SUM(A1:A2)", variable = {"A1":1, "A2":2})
 
 - Loading a CSV file and evaluating all the formulas in cells:
 
-  > WIP
+```bash
+$ cat test.csv
+>>> 1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    =SUM(A1:A10),=SUM(B1:B10),=SUM(C1:C10),=SUM(D1:D10)
+
+$ python formula_resolver/main.py test.csv
+>>> 1,2,3,3,
+    1,2,3,3,
+    1,2,3,3,
+    1,2,3,3,
+    1,2,3,3,
+    1,2,3,3,
+    1,2,3,3,
+    1,2,3,3,
+    1,2,3,3,
+    1,2,3,3,
+    10,20,30,30,
+```
+
+> WIP
 
 ### Limitations
 
@@ -53,9 +80,9 @@ Not implemented:
 
 ### TODO
 
-- [ ] parse and resolve csv file
+- [x] parse and resolve csv file
 - [ ] implement repl
-- [ ] use custom dict for variables
+- [x] use custom dict for variables
 - [ ] better error handling in parser and log management
 - [ ] return correct error types (e.g. #NAME?, #REF!, #NULL!, #N/A, #DIV0!, #NUM!)
 - [ ] implemented some ref functions
