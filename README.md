@@ -61,8 +61,6 @@ $ python formula_resolver/main.py test.csv
     10,20,30,30,
 ```
 
-> WIP
-
 ### Limitations
 
 This project is intended as a simple example and has some limitations:
