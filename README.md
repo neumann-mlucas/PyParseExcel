@@ -12,13 +12,32 @@ The project is implemented in Python and consists of the following files:
 - `lexer.py`: Defines the lexical analysis rules for the parser.
 - `parser.py`: Defines the syntax analysis rules for the parser to assemple the AST.
 - `interpreter.py`: Implements the interpreter that evaluates the AST.
-- `main.py`: Provides a REPL (WIP) for users to input and evaluate Excel formulas and a cli interface to process csv files.
+- `main.py`: Provides a REPL for users to input and evaluate Excel formulas and a cli interface to process csv files.
 
 ### Usage
 
 - Using the REPL:
 
-  > WIP
+```bash
+$ cat test.csv
+>>> 1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    1,2,3,=MAX(A1:C1),
+    =SUM(A1:A10),=SUM(B1:B10),=SUM(C1:C10),=SUM(D1:D10)
+
+$ python formula_resolver/main.py -i test.csv
+>>> MAX(A1:C1)
+3
+>>> COS(2 * PI())
+1.0
+```
 
 - Calling the API directly inside a script:
 
@@ -79,7 +98,7 @@ Not implemented:
 ### TODO
 
 - [x] parse and resolve csv file
-- [ ] implement repl
+- [x] implement repl
 - [x] use custom dict for variables
 - [ ] better error handling in parser and log management
 - [ ] return correct error types (e.g. #NAME?, #REF!, #NULL!, #N/A, #DIV0!, #NUM!)

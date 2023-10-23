@@ -2,6 +2,7 @@ import csv
 import sys
 from collections import UserDict
 from pathlib import Path
+from pprint import pprint
 from typing import Iterator
 
 from interpreter import formula_resolver
@@ -58,10 +59,10 @@ def variables2csv(variables: Variables) -> str:
 
 def main() -> None:
     # argument checks
-    assert len(sys.argv) == 2, ValueError(
-        "wrong number of args, must pass a filename as the first argument"
+    assert len(sys.argv) in (2, 3), ValueError(
+        "wrong number of args, must pass a filename as an argument"
     )
-    filename, path = sys.argv[1], Path(sys.argv[1])
+    filename, path = sys.argv[-1], Path(sys.argv[-1])
     assert path.exists(), FileNotFoundError(f"file {filename} doesn't exist")
     assert path.is_file(), FileNotFoundError(f"argument {filename} is not a file")
 
@@ -71,12 +72,29 @@ def main() -> None:
     except Exception as e:
         raise Exception(f"Could not parse CSV file: {e}")
 
+    # on interactve flag, enter REPL mode
+    if "-i" in sys.argv:
+        return repl(variables)
+
     # evaluates cells and print to stdout
     try:
         csv_out = "".join(variables2csv(variables))
         print(csv_out.rstrip(), end="")
     except Exception as e:
         raise Exception(f"Interpreter Error: {e}")
+
+
+def repl(variables: Variables) -> None:
+    while True:  # REPL loop
+        cell = input(">>> ")
+        if cell == "sheet":
+            pprint(variables)
+            continue
+        try:
+            variables["CURRENT CELL"] = cell
+            print(variables["CURRENT CELL"])
+        except Exception as e:
+            print(f"Interpreter Error: {e}")
 
 
 if __name__ == "__main__":
