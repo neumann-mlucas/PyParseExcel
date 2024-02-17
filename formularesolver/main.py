@@ -110,6 +110,11 @@ class PyParseExcelShell(cmd.Cmd):
         "print the sheet to the terminal"
         print(self.variables)
 
+    def do_dump(self, arg) -> None:
+        "convert sheet to csv and print output to the terminal"
+        csv_out = "".join(variables2csv(self.variables))
+        print(csv_out)
+
     def do_exit(self, arg: str) -> bool:
         "exit the shell"
         return True
