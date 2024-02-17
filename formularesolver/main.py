@@ -1,3 +1,4 @@
+import cmd
 import csv
 import sys
 from collections import UserDict
@@ -57,6 +58,36 @@ def variables2csv(variables: Variables) -> str:
         first = True
 
 
+class PyParseExcelShell(cmd.Cmd):
+    intro = "Welcome to the PyParseExcel shell.\nType help or ? to list commands.\n"
+    prompt = "(sheet) "
+    file = None
+
+    def __init__(self, variables: Variables) -> None:
+        self.variables = variables
+        super().__init__()
+
+    def do_set(self, arg: str) -> None:
+        "attribute a value to a given cell in the sheet\n\t$ set [cell] [formula / value]"
+        cell, formula, *_ = arg.split(maxsplit=1)
+        self.variables[cell] = formula
+        print(f">>> {cell} = {self.variables[cell]}")
+
+    def do_get(self, arg: str) -> None:
+        "print the value of a cell to the terminal\n\t$ get [cell]"
+        cell, *_ = arg.split()
+        formula = self.variables.__dict__["data"].get(cell)
+        print(f">>> {cell} = {self.variables[cell]}  (formula: {formula!r})")
+
+    def do_view(self, arg) -> None:
+        "print the sheet to the terminal"
+        pprint(self.variables)
+
+    def do_exit(self, arg: str) -> bool:
+        "exit the shell"
+        return True
+
+
 def main() -> None:
     # argument checks
     assert len(sys.argv) in (2, 3), ValueError(
@@ -74,7 +105,8 @@ def main() -> None:
 
     # on interactve flag, enter REPL mode
     if "-i" in sys.argv:
-        return repl(variables)
+        PyParseExcelShell(variables).cmdloop()
+        return
 
     # evaluates cells and print to stdout
     try:
@@ -82,19 +114,6 @@ def main() -> None:
         print(csv_out.rstrip(), end="")
     except Exception as e:
         raise Exception(f"Interpreter Error: {e}")
-
-
-def repl(variables: Variables) -> None:
-    while True:  # REPL loop
-        cell = input(">>> ")
-        if cell == "sheet":
-            pprint(variables)
-            continue
-        try:
-            variables["CURRENT CELL"] = cell
-            print(variables["CURRENT CELL"])
-        except Exception as e:
-            print(f"Interpreter Error: {e}")
 
 
 if __name__ == "__main__":
