@@ -21,6 +21,34 @@ class Variables(UserDict):
     def __missing__(self, key):
         return ""
 
+    def __repr__(self) -> str:
+        cells = [list(line) for line in get_bounds(self)]
+
+        # gen header with col names from the first line
+        header = ["|      |"]
+        for cell in cells[0]:
+            cell = "".join(c for c in cell if not c.isnumeric())  # remove numbers
+            header.append(f"{cell:^6}|")
+        header.append("\n")
+
+        # construct and add table divisor / spacer
+        len_header = len("".join(header)) - 1
+        div = "-" * len_header + "\n"
+        repr = [div] + header + [div]
+
+        # iter all cells and add then to the table representation
+        for line in cells:
+            # add line number
+            n = "".join(c for c in line[0] if c.isnumeric())  # remove letters
+            repr.append(f"|{n:^6}|")
+            # add cells
+            for cell in line:
+                repr.append(f"{self[cell]:>6}|")
+            repr.append("\n")
+
+        repr.append(div)
+        return "".join(repr)
+
 
 def csv2variables(filename: str) -> Variables:
     "parse a CSV file into a Variables dict"
@@ -31,16 +59,6 @@ def csv2variables(filename: str) -> Variables:
             for col_char, cell in zip(alphabetical_generator(), row):
                 variables[col_char + str(line_num)] = cell.strip()
     return variables
-
-
-def get_bounds(variables: Variables) -> Iterator[str]:
-    "returns a list of excel cells where the indices are the csv positions"
-    only_nums = lambda s: int("".join(c for c in s if c.isnumeric()))
-    only_chars = lambda s: "".join(c for c in s if not c.isnumeric())
-    max_line = max(map(only_nums, variables.keys()))
-    max_col = max(map(only_chars, variables.keys()), key=lambda s: (len(s), s))
-
-    return ((c + str(j) for c in arange("A", max_col)) for j in range(1, max_line + 1))
 
 
 def variables2csv(variables: Variables) -> str:
@@ -56,6 +74,16 @@ def variables2csv(variables: Variables) -> str:
                 yield f",{variables[cell]}"
         yield "\n"
         first = True
+
+
+def get_bounds(variables: Variables) -> Iterator[str]:
+    "returns a list of excel cells where the indices are the csv positions"
+    only_nums = lambda s: int("".join(c for c in s if c.isnumeric()))
+    only_chars = lambda s: "".join(c for c in s if not c.isnumeric())
+    max_line = max(map(only_nums, variables.keys()))
+    max_col = max(map(only_chars, variables.keys()), key=lambda s: (len(s), s))
+
+    return ((c + str(j) for c in arange("A", max_col)) for j in range(1, max_line + 1))
 
 
 class PyParseExcelShell(cmd.Cmd):
@@ -81,7 +109,7 @@ class PyParseExcelShell(cmd.Cmd):
 
     def do_view(self, arg) -> None:
         "print the sheet to the terminal"
-        pprint(self.variables)
+        print(self.variables)
 
     def do_exit(self, arg: str) -> bool:
         "exit the shell"
