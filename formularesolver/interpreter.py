@@ -2,6 +2,7 @@ import math
 import operator
 from parser import (ASTNode, ConstantNode, FunctionNode, ParenthesesNode,
                     VariableNode, parser)
+from typing import Callable
 
 from lexer import Token, lexer
 from utils import excel_range
@@ -11,7 +12,7 @@ def range_operator(a: str, b: str, variables: dict) -> list:
     return [variables.get(v) for v in excel_range(a, b)]
 
 
-OPERATIONS = {
+OPERATIONS: dict[str, Callable] = {
     # logical functions
     "AND": lambda *args: all(args),
     "OR": lambda *args: any(args),
@@ -79,7 +80,7 @@ def need_refs(function: str) -> bool:
     return function in (":")
 
 
-def formula_resolver(expr: str, variables: dict = None):
+def formula_resolver(expr: str, variables: dict | None = None):
     if variables is None:
         variables = {}
     tokens = lexer(expr)

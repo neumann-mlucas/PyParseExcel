@@ -36,7 +36,8 @@ def parse_parenthesis_expr(tokens: Iterator[Token]) -> Iterator[Token]:
 
 def split_args(tokens: Iterator[Token]) -> Iterator[list[Token]]:
     "split a expression on top level commas"
-    depth, buf = 0, []
+    depth = 0
+    buf: list[Token] = []
     for token in tokens:
         match (token.value, depth):
             case (",", 0):
@@ -54,8 +55,7 @@ def split_args(tokens: Iterator[Token]) -> Iterator[list[Token]]:
 def parse_function_args(tokens: Iterator[Token]) -> list[list[Token]]:
     "parse tokens inside function parenthesis e.g. fn( ... )"
     args = parse_parenthesis_expr(tokens)
-    args = split_args(args)
-    return list(args)  # need to consume iterator here
+    return list(split_args(args))  # need to consume iterator here
 
 
 def alphabetical_generator() -> Iterator[str]:
@@ -78,6 +78,9 @@ def arange(start: str, stop: str) -> Iterator[str]:
 
 def excel_range(start: str, stop: str) -> Iterator[str]:
     "returns all cell in a excel range"
+    mstart, mstop = re.match(r"([A-Z]+)(\d+)", start), re.match(r"([A-Z]+)(\d+)", stop)
+    assert mstart and mstop, ValueError("bad excel range")
+
     start_col, start_row = re.match(r"([A-Z]+)(\d+)", start).groups()
     stop_col, stop_row = re.match(r"([A-Z]+)(\d+)", stop).groups()
 

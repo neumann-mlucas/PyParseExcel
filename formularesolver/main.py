@@ -3,8 +3,7 @@ import csv
 import sys
 from collections import UserDict
 from pathlib import Path
-from pprint import pprint
-from typing import Iterator
+from typing import Generator
 
 from interpreter import formula_resolver
 from utils import alphabetical_generator, arange
@@ -61,7 +60,7 @@ def csv2variables(filename: str) -> Variables:
     return variables
 
 
-def variables2csv(variables: Variables) -> str:
+def variables2csv(variables: Variables) -> Generator:
     "evaluates the cell variables and format then into a csv"
     lines = get_bounds(variables)
     first = True
@@ -76,7 +75,7 @@ def variables2csv(variables: Variables) -> str:
         first = True
 
 
-def get_bounds(variables: Variables) -> Iterator[str]:
+def get_bounds(variables: Variables) -> Generator:
     "returns a list of excel cells where the indices are the csv positions"
     only_nums = lambda s: int("".join(c for c in s if c.isnumeric()))
     only_chars = lambda s: "".join(c for c in s if not c.isnumeric())
